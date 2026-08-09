@@ -1,0 +1,35 @@
+name: Daily Ephemeris
+
+on:
+  schedule:
+    - cron: '0 18 * * 1-5'   # 18:00 UTC = 23:30 IST, Mon-Fri
+  workflow_dispatch:           # allow manual trigger from GitHub UI
+
+jobs:
+  compute:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pyswisseph astral
+
+      - name: Run ephemeris engine
+        run: python compute_ephemeris.py
+
+      - name: Commit and push JSON
+        run: |
+          git config user.name  "SAM Astro Bot"
+          git config user.email "bot@sam-astro.local"
+          git add data/ephemeris.json
+          git diff --cached --quiet || git commit -m "Daily signal $(date +'%Y-%m-%d')"
+          git push
