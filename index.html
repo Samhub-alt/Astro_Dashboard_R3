@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAM Astro — Live NIFTY Signal Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Cinzel:wght@600&display=swap');
+:root{
+  --bg:#07090D;--bg2:#0D1018;--bg3:#121620;--bg4:#181D2A;
+  --border:#1E2540;--border2:#2A3360;
+  --gold:#C9A84C;--gold2:#E8C96A;--purple:#8B6FFF;--purple2:#A07EFF;
+  --cyan:#00CFFF;--green:#00E5A0;--red:#FF4D6D;--orange:#FF8C42;
+  --teal:#14B8A6;--text:#E2E8F0;--text2:#94A3B8;--text3:#4A5568;--yellow:#FFD700;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── TOP BAR ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;
+  background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.logo{font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold2);letter-spacing:2px;}
+.logo span{color:var(--cyan);font-size:.75rem;display:block;letter-spacing:3px;font-family:'Space Mono',monospace;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 6px var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.update-time{font-family:'Space Mono',monospace;font-size:.62rem;color:var(--text3);}
+.refresh-btn{background:var(--bg3);border:1px solid var(--border2);color:var(--cyan);
+  padding:5px 12px;border-radius:6px;font-size:.72rem;cursor:pointer;font-family:'Space Mono',monospace;}
+.refresh-btn:hover{background:var(--border2);}
+
+/* ── LAYOUT ── */
+.container{max-width:1100px;margin:0 auto;padding:16px 16px 60px;}
+
+/* ── SCORE HERO ── */
+.hero{display:grid;grid-template-columns:260px 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:720px){.hero{grid-template-columns:1fr;}}
+
+.score-box{background:var(--bg2);border:1px solid var(--border);border-radius:16px;
+  padding:24px 20px;text-align:center;position:relative;overflow:hidden;}
+.score-box::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 0%,var(--glow-color,.05) 0%,transparent 65%);
+  pointer-events:none;transition:background .5s;}
+.score-num{font-family:'Space Mono',monospace;font-size:4rem;font-weight:700;
+  line-height:1;margin:8px 0;transition:color .4s;}
+.score-label{font-family:'Cinzel',serif;font-size:1.1rem;font-weight:600;letter-spacing:2px;
+  margin-bottom:4px;transition:color .4s;}
+.score-acc{font-size:.72rem;color:var(--text3);margin-bottom:16px;font-family:'Space Mono',monospace;}
+.score-bar-wrap{background:var(--bg4);border-radius:8px;height:10px;overflow:hidden;margin-bottom:14px;}
+.score-bar{height:100%;border-radius:8px;transition:width .6s ease,background .5s;}
+.score-date{font-size:.68rem;color:var(--text3);font-family:'Space Mono',monospace;}
+.skip-flag{background:rgba(74,85,104,.15);border:1px solid var(--text3);border-radius:6px;
+  padding:4px 10px;font-size:.62rem;color:var(--text3);margin-top:8px;display:inline-block;letter-spacing:1px;}
+
+/* ── PANCHANG ── */
+.panchang-box{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px;}
+.panchang-title{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:2px;
+  text-transform:uppercase;color:var(--text3);margin-bottom:12px;}
+.panchang-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;}
+.pg-item{padding:6px 0;border-bottom:1px solid var(--border);}
+.pg-item:last-child,.pg-item:nth-last-child(2){border-bottom:none;}
+.pg-label{font-size:.61rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;}
+.pg-value{font-size:.85rem;font-weight:600;color:var(--text);}
+.pg-value.bull{color:var(--green);}.pg-value.bear{color:var(--red);}
+.pg-value.gold{color:var(--gold2);}.pg-value.cyan{color:var(--cyan);}
+.pg-value.mono{font-family:'Space Mono',monospace;font-size:.78rem;}
+
+/* ── SIGNALS ── */
+.signals-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:14px;
+  padding:18px 20px;margin-bottom:14px;}
+.sec-title{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:2px;
+  text-transform:uppercase;color:var(--text3);margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.signal-row{display:flex;align-items:center;gap:10px;padding:8px 0;
+  border-bottom:1px solid var(--border);font-size:.82rem;}
+.signal-row:last-child{border-bottom:none;}
+.sig-arrow{font-size:1rem;min-width:20px;text-align:center;}
+.sig-pts{font-family:'Space Mono',monospace;font-size:.7rem;font-weight:700;
+  min-width:30px;text-align:right;}
+.sig-pts.pos{color:var(--green);}.sig-pts.neg{color:var(--red);}
+.sig-cat{font-size:.58rem;background:var(--bg3);border:1px solid var(--border);
+  color:var(--text3);padding:1px 6px;border-radius:3px;white-space:nowrap;letter-spacing:.5px;}
+.sig-text{color:var(--text2);flex:1;}
+.no-signals{color:var(--text3);font-size:.82rem;text-align:center;padding:16px;}
+
+/* ── LIVE F30 TRACKER ── */
+.f30-box{background:var(--bg2);border:1px solid var(--border);border-radius:14px;
+  padding:18px 20px;margin-bottom:14px;}
+.f30-inputs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:12px 0;}
+@media(max-width:600px){.f30-inputs{grid-template-columns:1fr 1fr;}}
+.f30-field label{display:block;font-size:.6rem;color:var(--text3);text-transform:uppercase;
+  letter-spacing:1px;margin-bottom:4px;}
+.f30-field input{width:100%;background:var(--bg3);border:1px solid var(--border2);
+  color:var(--text);padding:8px 10px;border-radius:7px;font-family:'Space Mono',monospace;
+  font-size:.85rem;outline:none;}
+.f30-field input:focus{border-color:var(--cyan);}
+.f30-result{background:var(--bg3);border-radius:10px;padding:14px 16px;margin-top:12px;
+  display:none;text-align:center;}
+.f30-result.show{display:block;}
+.f30-score{font-family:'Space Mono',monospace;font-size:1.5rem;font-weight:700;}
+.f30-verdict{font-family:'Cinzel',serif;font-size:.95rem;margin:4px 0;}
+.f30-acc{font-size:.72rem;color:var(--text3);}
+.calc-btn{background:var(--cyan);color:var(--bg);border:none;padding:9px 20px;
+  border-radius:8px;font-weight:700;font-size:.8rem;cursor:pointer;width:100%;margin-top:10px;}
+.calc-btn:hover{opacity:.85;}
+
+/* Momentum bars */
+.momentum-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:14px;
+  padding:18px 20px;margin-bottom:14px;}
+.bars-display{display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin:10px 0;}
+.bar-block{width:26px;height:34px;border-radius:4px;display:flex;align-items:center;
+  justify-content:center;font-size:.65rem;font-weight:700;cursor:pointer;
+  border:2px solid transparent;transition:all .15s;}
+.bar-block.up{background:rgba(0,229,160,.2);color:var(--green);border-color:rgba(0,229,160,.4);}
+.bar-block.down{background:rgba(255,77,109,.2);color:var(--red);border-color:rgba(255,77,109,.4);}
+.bar-block.neutral{background:var(--bg3);color:var(--text3);border-color:var(--border);}
+.bar-block.active{border-color:var(--yellow);box-shadow:0 0 8px rgba(255,215,0,.3);}
+.momentum-status{padding:10px 14px;border-radius:8px;font-size:.82rem;margin-top:8px;
+  display:none;line-height:1.5;}
+.momentum-status.show{display:block;}
+.momentum-status.bull{background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.25);color:var(--green);}
+.momentum-status.bear{background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.25);color:var(--red);}
+.momentum-status.neutral{background:var(--bg3);border:1px solid var(--border);color:var(--text2);}
+.consec-count{font-family:'Space Mono',monospace;font-size:1.1rem;font-weight:700;margin-bottom:4px;}
+.bar-controls{display:flex;gap:8px;margin-top:8px;}
+.bar-btn{flex:1;padding:7px;border-radius:7px;font-size:.75rem;font-weight:700;cursor:pointer;border:none;}
+.bar-btn.up-btn{background:rgba(0,229,160,.15);color:var(--green);border:1px solid rgba(0,229,160,.3);}
+.bar-btn.dn-btn{background:rgba(255,77,109,.15);color:var(--red);border:1px solid rgba(255,77,109,.3);}
+.bar-btn.neutral-btn{background:var(--bg3);color:var(--text3);border:1px solid var(--border);}
+.bar-btn.reset-btn{background:var(--bg3);color:var(--text3);border:1px solid var(--border);}
+.bar-btn:hover{opacity:.8;}
+
+/* 3-session tracker */
+.session-tracker{background:var(--bg2);border:1px solid var(--border);border-radius:14px;
+  padding:18px 20px;margin-bottom:14px;}
+.sessions-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;}
+.session-card{background:var(--bg3);border:2px solid var(--border);border-radius:10px;
+  padding:12px;text-align:center;cursor:pointer;transition:all .2s;}
+.session-card:hover{border-color:var(--border2);}
+.session-card.bull-s{border-color:var(--green);background:rgba(0,229,160,.06);}
+.session-card.bear-s{border-color:var(--red);background:rgba(255,77,109,.06);}
+.session-card.active-s{border-color:var(--cyan);}
+.session-label{font-size:.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;}
+.session-time{font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text3);margin-bottom:8px;}
+.session-btns{display:flex;gap:4px;justify-content:center;}
+.s-btn{padding:4px 10px;border-radius:5px;font-size:.68rem;font-weight:700;cursor:pointer;border:none;}
+.s-btn.up{background:rgba(0,229,160,.2);color:var(--green);}
+.s-btn.dn{background:rgba(255,77,109,.2);color:var(--red);}
+.s-btn.na{background:var(--bg4);color:var(--text3);}
+.session-result{margin-top:10px;padding:10px 14px;border-radius:8px;
+  font-size:.82rem;display:none;line-height:1.6;text-align:center;}
+.session-result.show{display:block;}
+.session-result.bull{background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.2);color:var(--green);}
+.session-result.bear{background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.2);color:var(--red);}
+.session-result.neutral{background:var(--bg3);border:1px solid var(--border);color:var(--text2);}
+
+/* ── TIMELINE ── */
+.timeline-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:14px;
+  padding:18px 20px;margin-bottom:14px;}
+.timeline{position:relative;padding-left:28px;}
+.timeline::before{content:'';position:absolute;left:10px;top:0;bottom:0;
+  width:1px;background:var(--border2);}
+.tl-item{position:relative;margin-bottom:12px;padding-bottom:0;}
+.tl-item:last-child{margin-bottom:0;}
+.tl-dot{position:absolute;left:-22px;top:3px;width:10px;height:10px;
+  border-radius:50%;border:2px solid;background:var(--bg);}
+.tl-dot.market{border-color:var(--cyan);background:var(--cyan);}
+.tl-dot.hora{border-color:var(--gold);}
+.tl-dot.nakshatra{border-color:var(--green);background:rgba(0,229,160,.3);}
+.tl-dot.pada{border-color:var(--text3);}
+.tl-dot.tithi{border-color:var(--purple2);}
+.tl-dot.solunar{border-color:var(--orange);}
+.tl-dot.gann{border-color:var(--teal);}
+.tl-dot.close{border-color:var(--red);background:var(--red);}
+.tl-time{font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text3);margin-bottom:1px;}
+.tl-label{font-size:.82rem;font-weight:600;color:var(--text);}
+.tl-note{font-size:.74rem;color:var(--text2);margin-top:1px;}
+.tl-now{border-color:var(--yellow)!important;background:var(--yellow)!important;
+  box-shadow:0 0 8px rgba(255,215,0,.5);}
+.tl-item.past .tl-label{color:var(--text3);}
+.tl-item.past .tl-note{color:var(--text3);}
+
+/* ── PLANET TABLE ── */
+.planet-table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:14px;
+  padding:18px 20px;margin-bottom:14px;overflow-x:auto;}
+.pt{width:100%;border-collapse:collapse;font-size:.79rem;}
+.pt th{text-align:left;padding:7px 8px;font-size:.59rem;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--text3);background:var(--bg3);
+  border-bottom:1px solid var(--border2);}
+.pt td{padding:7px 8px;border-bottom:1px solid var(--border);}
+.pt tr:last-child td{border-bottom:none;}
+.pt tr:hover td{background:rgba(255,255,255,.015);}
+.rx-tag{background:rgba(255,140,66,.15);color:var(--orange);font-size:.6rem;
+  font-weight:700;padding:1px 5px;border-radius:3px;margin-left:4px;}
+.combust-tag{background:rgba(255,77,109,.15);color:var(--red);font-size:.6rem;
+  padding:1px 5px;border-radius:3px;margin-left:4px;}
+
+/* ── WARNINGS ── */
+.warnings-wrap{margin-bottom:14px;}
+.warning-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;
+  border-radius:8px;font-size:.75rem;font-weight:600;margin:4px;border:1px solid;}
+.wc-red{background:rgba(255,77,109,.1);color:var(--red);border-color:rgba(255,77,109,.3);}
+.wc-orange{background:rgba(255,140,66,.1);color:var(--orange);border-color:rgba(255,140,66,.3);}
+.wc-purple{background:rgba(139,111,255,.1);color:var(--purple2);border-color:rgba(139,111,255,.3);}
+.wc-green{background:rgba(0,229,160,.1);color:var(--green);border-color:rgba(0,229,160,.3);}
+.wc-gray{background:var(--bg3);color:var(--text3);border-color:var(--border);}
+
+/* ── WEEKLY ── */
+.weekly-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:14px;
+  padding:18px 20px;margin-bottom:14px;}
+.weekly-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px;}
+@media(max-width:600px){.weekly-grid{grid-template-columns:1fr 1fr;}}
+.week-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  padding:11px 10px;text-align:center;}
+.week-card.trade{border-left:3px solid var(--green);}
+.week-card.notrade{border-left:3px solid var(--text3);}
+.week-card.beartrade{border-left:3px solid var(--red);}
+.wk-date{font-family:'Space Mono',monospace;font-size:.62rem;color:var(--text3);margin-bottom:4px;}
+.wk-nak{font-size:.76rem;font-weight:600;color:var(--text);}
+.wk-tithi{font-size:.67rem;color:var(--text2);margin:2px 0;}
+.wk-score{font-family:'Space Mono',monospace;font-size:.72rem;font-weight:700;margin-top:6px;}
+.wk-verdict{font-size:.65rem;font-weight:700;letter-spacing:.5px;margin-top:2px;}
+.bull-txt{color:var(--green);}.bear-txt{color:var(--red);}.neutral-txt{color:var(--text3);}
+
+/* ── SETUPS ── */
+.setups-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:14px;
+  padding:18px 20px;margin-bottom:14px;}
+.setup-card{border-radius:10px;padding:13px 15px;margin-bottom:8px;border:1px solid;}
+.setup-card:last-child{margin-bottom:0;}
+.setup-card.bull{background:rgba(0,229,160,.05);border-color:rgba(0,229,160,.25);}
+.setup-card.bear{background:rgba(255,77,109,.05);border-color:rgba(255,77,109,.25);}
+.setup-card.warn{background:rgba(255,140,66,.05);border-color:rgba(255,140,66,.25);}
+.setup-card.info{background:var(--bg3);border-color:var(--border);}
+.setup-label{font-size:.6rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;}
+.setup-card.bull .setup-label{color:var(--green);}
+.setup-card.bear .setup-label{color:var(--red);}
+.setup-card.warn .setup-label{color:var(--orange);}
+.setup-card.info .setup-label{color:var(--text3);}
+.setup-title{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:4px;}
+.setup-cond{font-size:.79rem;color:var(--text2);margin-bottom:3px;}
+.setup-acc{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--gold2);}
+
+/* ── LOADING / ERROR ── */
+.loading{text-align:center;padding:60px 20px;color:var(--text3);}
+.loading-spinner{width:36px;height:36px;border:3px solid var(--border);
+  border-top-color:var(--cyan);border-radius:50%;animation:spin 1s linear infinite;
+  margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.error-box{background:rgba(255,77,109,.05);border:1px solid rgba(255,77,109,.2);
+  border-radius:12px;padding:20px;text-align:center;color:var(--text2);}
+
+/* ── MISC ── */
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+@media(max-width:720px){.row2{grid-template-columns:1fr;}}
+.mono-sm{font-family:'Space Mono',monospace;font-size:.72rem;}
+small{font-size:.7rem;color:var(--text3);}
+.tag{display:inline-block;font-size:.59rem;font-weight:700;padding:1px 7px;
+  border-radius:3px;letter-spacing:.5px;text-transform:uppercase;}
+.tag-green{background:rgba(0,229,160,.12);color:var(--green);}
+.tag-red{background:rgba(255,77,109,.12);color:var(--red);}
+.tag-gray{background:var(--bg3);color:var(--text3);}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">SAM ASTRO<span>NIFTY Signal Engine</span></div>
+  <div class="topbar-right">
+    <div class="live-dot" id="liveDot"></div>
+    <div class="update-time" id="updateTime">Loading…</div>
+    <button class="refresh-btn" onclick="loadData()">↺ Refresh</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- LOADING STATE -->
+  <div class="loading" id="loadingState">
+    <div class="loading-spinner"></div>
+    <div>Loading ephemeris data…</div>
+  </div>
+
+  <!-- MAIN CONTENT (hidden until loaded) -->
+  <div id="mainContent" style="display:none;">
+
+    <!-- HERO: Score + Panchang -->
+    <div class="hero">
+      <!-- Score Box -->
+      <div class="score-box" id="scoreBox">
+        <div style="font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:2px;
+          text-transform:uppercase;color:var(--text3);margin-bottom:6px;">Composite Score</div>
+        <div class="score-num" id="scoreNum">—</div>
+        <div class="score-label" id="scoreLabel">—</div>
+        <div class="score-acc" id="scoreAcc">—</div>
+        <div class="score-bar-wrap"><div class="score-bar" id="scoreBar"></div></div>
+        <div class="score-date" id="scoreDate">—</div>
+        <div class="skip-flag" id="skipFlag" style="display:none;">⊘ NEUTRAL ZONE — reduce size or skip</div>
+      </div>
+
+      <!-- Panchang -->
+      <div class="panchang-box">
+        <div class="panchang-title">Today's Panchang</div>
+        <div class="panchang-grid" id="panchangGrid"><!-- filled by JS --></div>
+      </div>
+    </div>
+
+    <!-- WARNINGS ROW -->
+    <div class="warnings-wrap" id="warningsWrap" style="display:none;">
+      <div style="font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:2px;
+        text-transform:uppercase;color:var(--text3);margin-bottom:8px;">⚠ Active Warnings</div>
+      <div id="warningChips"></div>
+    </div>
+
+    <!-- SIGNALS + SETUPS -->
+    <div class="row2">
+      <div class="signals-wrap">
+        <div class="sec-title">Signals Fired Today</div>
+        <div id="signalsList"><!-- filled by JS --></div>
+      </div>
+      <div class="setups-wrap">
+        <div class="sec-title">High-Accuracy Setups</div>
+        <div id="setupsList"><!-- filled by JS --></div>
+      </div>
+    </div>
+
+    <!-- LIVE F30 TRACKER -->
+    <div class="f30-box">
+      <div class="sec-title">Live F30 Tracker — Enter After 09:45</div>
+      <p style="font-size:.78rem;color:var(--text2);margin-bottom:10px;">
+        Enter NIFTY prices after 09:45 to get the updated hybrid score with price confirmation.
+        F30 = (09:45 price − 09:15 open) ÷ open × 100
+      </p>
+      <div class="f30-inputs">
+        <div class="f30-field">
+          <label>09:15 Open Price</label>
+          <input type="number" id="openPrice" placeholder="e.g. 24500" step="0.05">
+        </div>
+        <div class="f30-field">
+          <label>09:45 Price (F30)</label>
+          <input type="number" id="f30Price" placeholder="e.g. 24620" step="0.05">
+        </div>
+        <div class="f30-field">
+          <label>Current CMP (optional)</label>
+          <input type="number" id="cmpPrice" placeholder="e.g. 24580" step="0.05">
+        </div>
+      </div>
+      <button class="calc-btn" onclick="calcF30()">Calculate Updated Score + Verdict</button>
+      <div class="f30-result" id="f30Result">
+        <div class="f30-score" id="f30ScoreNum">—</div>
+        <div class="f30-verdict" id="f30Verdict">—</div>
+        <div class="f30-acc" id="f30Acc">—</div>
+        <div style="font-size:.75rem;color:var(--text2);margin-top:8px;" id="f30Note">—</div>
+      </div>
+    </div>
+
+    <!-- MOMENTUM BAR COUNTER -->
+    <div class="momentum-wrap">
+      <div class="sec-title">Momentum Bar Counter — First 90 Min</div>
+      <p style="font-size:.78rem;color:var(--text2);margin-bottom:8px;">
+        Tap ▲ / ▼ for each 5-min bar direction. ≥5 consecutive = trend mode (62-66% accuracy).
+      </p>
+      <div class="bars-display" id="barsDisplay"><!-- filled --></div>
+      <div class="bar-controls">
+        <button class="bar-btn up-btn" onclick="addBar('up')">▲ UP bar</button>
+        <button class="bar-btn dn-btn" onclick="addBar('down')">▼ DOWN bar</button>
+        <button class="bar-btn neutral-btn" onclick="addBar('neutral')">— Doji</button>
+        <button class="bar-btn reset-btn" onclick="resetBars()">✕ Reset</button>
+      </div>
+      <div class="momentum-status" id="momentumStatus">
+        <div class="consec-count" id="consecCount">—</div>
+        <div id="consecVerdict">—</div>
+      </div>
+    </div>
+
+    <!-- 3-SESSION TRACKER -->
+    <div class="session-tracker">
+      <div class="sec-title">3-Session Tracker</div>
+      <p style="font-size:.78rem;color:var(--text2);margin-bottom:4px;">
+        Morning↑+Mid↑ = <strong>93.8% bull close</strong> &nbsp;|&nbsp;
+        Morning↓+Mid↓ = <strong>94.9% bear close</strong>
+      </p>
+      <div class="sessions-grid" id="sessionsGrid"><!-- filled by JS --></div>
+      <div class="session-result" id="sessionResult"><!-- filled --></div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="timeline-wrap">
+      <div class="sec-title">Intraday Event Timeline</div>
+      <div class="timeline" id="timeline"><!-- filled by JS --></div>
+    </div>
+
+    <!-- PLANETS -->
+    <div class="planet-table-wrap">
+      <div class="sec-title">Planetary Positions — 09:15 IST (Lahiri Sidereal)</div>
+      <table class="pt" id="planetTable"><!-- filled by JS --></table>
+    </div>
+
+    <!-- WEEKLY -->
+    <div class="weekly-wrap">
+      <div class="sec-title">5-Day Weekly Forecast (Pre-open Vedic Score)</div>
+      <p style="font-size:.75rem;color:var(--text2);margin-bottom:0;">
+        Score ≥3 = potential bull | ≤−3 = potential bear | ±2 = neutral/skip. Always confirm with F30 after open.
+      </p>
+      <div class="weekly-grid" id="weeklyGrid"><!-- filled by JS --></div>
+    </div>
+
+    <div style="text-align:center;padding:20px 0;font-family:'Space Mono',monospace;
+      font-size:.6rem;color:var(--text3);border-top:1px solid var(--border);margin-top:10px;">
+      SAM Astro · Swiss Ephemeris + Lahiri Ayanamsa · NSE Natal Nov 3 1994 ·
+      5 Phases · 2,768 Days Backtested · Not Investment Advice
+    </div>
+  </div><!-- /mainContent -->
+</div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────
+let DATA = null;
+let bars = [];
+let sessions = { morning: null, mid: null, afternoon: null };
+
+// ── LOAD DATA ─────────────────────────────────────────────────
+async function loadData() {
+  try {
+    const res = await fetch('data/ephemeris.json?_=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    DATA = await res.json();
+    renderAll();
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    document.getElementById('updateTime').textContent =
+      DATA.meta?.generated_at || 'Loaded';
+  } catch(e) {
+    document.getElementById('loadingState').innerHTML =
+      `<div class="error-box">
+        <div style="font-size:1.1rem;margin-bottom:8px;">⚠ Could not load signal data</div>
+        <div style="font-size:.8rem;color:var(--text3);">
+          Run <code style="color:var(--cyan);">python compute_ephemeris.py</code>
+          to generate <code style="color:var(--cyan);">data/ephemeris.json</code><br><br>
+          Error: ${e.message}
+        </div>
+      </div>`;
+  }
+}
+
+// ── RENDER ALL ────────────────────────────────────────────────
+function renderAll() {
+  renderScore();
+  renderPanchang();
+  renderWarnings();
+  renderSignals();
+  renderSetups();
+  renderTimeline();
+  renderPlanets();
+  renderWeekly();
+  renderSessions();
+  resetBars();
+}
+
+// ── SCORE ─────────────────────────────────────────────────────
+function renderScore() {
+  const d = DATA;
+  const score = d.score;
+  const el = (id) => document.getElementById(id);
+
+  el('scoreNum').textContent = (score >= 0 ? '+' : '') + score;
+  el('scoreLabel').textContent = d.verdict;
+  el('scoreAcc').textContent = 'Expected accuracy: ' + d.accuracy;
+  el('scoreDate').textContent = d.display || d.date;
+
+  // Color theming
+  let color, glow, barPct, barColor;
+  if (score >= 8)       { color=glow='#00E5A0'; barPct=95; barColor='#00E5A0'; }
+  else if (score >= 4)  { color='#00E5A0'; glow='rgba(0,229,160,.4)'; barPct=75; barColor='#00E5A0'; }
+  else if (score >= 1)  { color='#E8C96A'; glow='rgba(232,201,106,.3)'; barPct=58; barColor='#E8C96A'; }
+  else if (score >= -1) { color='#4A5568'; glow='transparent'; barPct=50; barColor='#4A5568'; }
+  else if (score >= -3) { color='#FF8C42'; glow='rgba(255,140,66,.3)'; barPct=42; barColor='#FF8C42'; }
+  else if (score >= -7) { color='#FF4D6D'; glow='rgba(255,77,109,.4)'; barPct=25; barColor='#FF4D6D'; }
+  else                  { color='#FF4D6D'; glow='#FF4D6D'; barPct=5; barColor='#FF4D6D'; }
+
+  el('scoreNum').style.color   = color;
+  el('scoreLabel').style.color = color;
+  el('scoreBox').style.setProperty('--glow-color', glow);
+  el('scoreBar').style.width      = barPct + '%';
+  el('scoreBar').style.background = barColor;
+
+  if (d.skip_day) el('skipFlag').style.display = 'inline-block';
+}
+
+// ── PANCHANG ─────────────────────────────────────────────────
+function renderPanchang() {
+  const p = DATA.panchang;
+  const items = [
+    ['Nakshatra', p.nakshatra + ' (Pada ' + p.pada + ')',
+      DATA.nak_idx >= 0 ? '' : ''],
+    ['Tithi', p.tithi + ' #' + p.tithi_num, ''],
+    ['Paksha', p.paksha, p.paksha === 'Shukla' ? 'bull' : 'bear'],
+    ['Yoga', p.yoga, ''],
+    ['Karana', p.karana, ''],
+    ['Moon Element', p.moon_elem || '—',
+      p.moon_elem === 'Earth' ? 'bull' : p.moon_elem === 'Water' ? 'bear' : ''],
+    ['Moon Position', p.moon_pos || '—', 'mono'],
+    ['Sun Position',  p.sun_pos  || '—', 'mono'],
+    ['Moon Speed',    (p.moon_speed || '—') + ' (' + (p.moon_speed_cat || '') + ')', 'mono'],
+    ['NSE Tara', (p.nse_tara_name || p.nse_tara || '—'),
+      p.nse_tara_type === 'bull' ? 'bull' : p.nse_tara_type === 'bear' ? 'bear' : ''],
+    ['Hora @ 09:15', (p.hora_name || p.hora_at_open || '—') + ' (' + (p.hora_nature || '') + ')',
+      p.hora_nature === 'Bull' ? 'bull' : p.hora_nature === 'Bear' ? 'bear' : ''],
+    ['Dasha', (p.dasha_maha_name || '—') + ' – ' + (p.dasha_antar_name || '—'), 'gold'],
+    ['Sunrise', p.sunrise || '06:10', 'mono'],
+    ['Sunset',  p.sunset  || '18:30', 'mono'],
+  ];
+
+  document.getElementById('panchangGrid').innerHTML = items.map(([label, val, cls]) =>
+    `<div class="pg-item">
+      <div class="pg-label">${label}</div>
+      <div class="pg-value ${cls || ''}">${val}</div>
+    </div>`
+  ).join('');
+}
+
+// ── WARNINGS ─────────────────────────────────────────────────
+function renderWarnings() {
+  const w = DATA.warnings || DATA.key_warnings || {};
+  const chips = [];
+
+  const add = (condition, label, cls) => {
+    if (condition) chips.push(`<span class="warning-chip ${cls}">${label}</span>`);
+  };
+
+  add(w.angarak_tight, '⚡ Angarak Tight (<3°) — Extreme Bear Risk', 'wc-red');
+  add(w.angarak && !w.angarak_tight, '⚡ Angarak Yoga (Mars-Ketu) — Bear Risk', 'wc-orange');
+  add(w.guru_chandal, '☿ Guru-Chandal — Amplifies Bear if F30 Down', 'wc-orange');
+  add(w.me_jup_stress, '☿ Mercury-Jupiter Stress — 18.6% Reversal Bear', 'wc-red');
+  add(w.mo_sat_stress, '☽ Moon-Saturn Square — Bear Signal', 'wc-orange');
+  add(w.mo_antares, '★ Moon–Antares — Monthly Bear Trigger', 'wc-red');
+  add(w.su_antares, '☀ Sun–Antares — Annual Bear Day', 'wc-red');
+  add(w.su_algol,   '★ Sun–Algol — Volatile Bear', 'wc-red');
+  add(w.gandanta,   '◈ Moon in Gandanta — Junction Energy', 'wc-orange');
+  add(w.me_rx, '☿ Mercury Retrograde', 'wc-purple');
+  add(w.ve_rx, '♀ Venus Retrograde', 'wc-purple');
+  add(w.ma_rx, '♂ Mars Retrograde', 'wc-purple');
+  add(w.ju_rx, '♃ Jupiter Retrograde', 'wc-purple');
+  add(w.sa_rx, '♄ Saturn Retrograde', 'wc-purple');
+  add(w.me_combust, '☿ Mercury Combust', 'wc-orange');
+  add(w.ju_combust, '♃ Jupiter Combust', 'wc-orange');
+  add(w.jup_sat_conj, '♃♄ Jup-Sat Conjunction — +83% Volatility', 'wc-orange');
+  add(w.ma_sat_stress,'♂♄ Mars-Saturn Stress — +50% Volatility', 'wc-orange');
+
+  const wrap = document.getElementById('warningsWrap');
+  if (chips.length > 0) {
+    wrap.style.display = 'block';
+    document.getElementById('warningChips').innerHTML = chips.join('');
+  } else {
+    wrap.innerHTML = `<div style="font-family:'Space Mono',monospace;font-size:.6rem;
+      letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">
+      Active Warnings</div>
+      <span class="warning-chip wc-green">✓ No Active Malefic Warnings Today</span>`;
+    wrap.style.display = 'block';
+  }
+}
+
+// ── SIGNALS ───────────────────────────────────────────────────
+function renderSignals() {
+  const sigs = DATA.signals || [];
+  if (!sigs.length) {
+    document.getElementById('signalsList').innerHTML =
+      '<div class="no-signals">No signals above threshold today.</div>';
+    return;
+  }
+  const sorted = [...sigs].sort((a,b) => Math.abs(b.pts) - Math.abs(a.pts));
+  document.getElementById('signalsList').innerHTML = sorted.map(s =>
+    `<div class="signal-row">
+      <div class="sig-arrow">${s.type === 'bull' ? '▲' : '▼'}</div>
+      <div class="sig-pts ${s.pts > 0 ? 'pos' : 'neg'}">${s.pts > 0 ? '+' : ''}${s.pts}</div>
+      <div class="sig-cat">${s.cat}</div>
+      <div class="sig-text">${s.text}</div>
+    </div>`
+  ).join('');
+}
+
+// ── SETUPS ────────────────────────────────────────────────────
+function renderSetups() {
+  const setups = DATA.setups || DATA.high_accuracy_setups || [];
+  if (!setups.length) {
+    document.getElementById('setupsList').innerHTML =
+      '<div class="no-signals">No high-accuracy setups configured.</div>';
+    return;
+  }
+  document.getElementById('setupsList').innerHTML = setups.map(s => {
+    const type = s.type || 'info';
+    const label = s.label || s.setup || '—';
+    const cond  = s.condition || s.status || '';
+    const acc   = s.accuracy || '';
+    const tgt   = s.target || '';
+    return `<div class="setup-card ${type}">
+      <div class="setup-label">${type.toUpperCase()} SETUP</div>
+      <div class="setup-title">${label}</div>
+      ${cond ? `<div class="setup-cond">${cond}</div>` : ''}
+      ${tgt  ? `<div class="setup-cond" style="color:var(--text3)">${tgt}</div>` : ''}
+      ${acc  ? `<div class="setup-acc">★ ${acc} accuracy</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ── TIMELINE ─────────────────────────────────────────────────
+function renderTimeline() {
+  const events = DATA.timeline || [];
+  const nowIST = new Date(new Date().toLocaleString('en-US', {timeZone:'Asia/Kolkata'}));
+  const nowMins = nowIST.getHours()*60 + nowIST.getMinutes();
+
+  document.getElementById('timeline').innerHTML = events.map(ev => {
+    const isPast   = ev.mins < nowMins - 2;
+    const isNow    = Math.abs(ev.mins - nowMins) <= 8;
+    const isFuture = ev.mins > nowMins + 2;
+
+    const dotClass = isNow ? 'tl-now' :
+                     (ev.type === 'market' || ev.type === 'open' ? 'market' :
+                      ev.type === 'close' ? 'close' :
+                      ev.type);
+
+    return `<div class="tl-item ${isPast ? 'past' : ''} ${isNow ? 'tl-now-item' : ''}">
+      <div class="tl-dot ${dotClass}"></div>
+      <div class="tl-time">${ev.time || hhmm(ev.mins)}${isNow ? ' ← NOW' : ''}</div>
+      <div class="tl-label">${ev.label}</div>
+      ${ev.note ? `<div class="tl-note">${ev.note}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function hhmm(mins) {
+  const h = Math.floor(mins/60), m = mins%60;
+  return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+}
+
+// ── PLANETS ───────────────────────────────────────────────────
+function renderPlanets() {
+  const planets = DATA.planets || {};
+  const rows = Object.entries(planets).map(([name, p]) => {
+    const rxTag = p.rx ? '<span class="rx-tag">Rx</span>' : '';
+    const cbTag = p.combust ? '<span class="combust-tag">Combust</span>' : '';
+    const spd   = p.speed != null ? (p.speed > 0 ? '+' : '') + p.speed.toFixed(3) + '°/d' : '—';
+    return `<tr>
+      <td style="font-weight:600">${name}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:.73rem">${p.lon != null ? p.lon.toFixed(2) + '°' : '—'}</td>
+      <td>${p.sign || '—'} ${rxTag}${cbTag}</td>
+      <td>${p.nak || '—'}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:.7rem">${spd}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('planetTable').innerHTML =
+    `<thead><tr>
+      <th>Planet</th><th>Longitude</th><th>Sign</th><th>Nakshatra</th><th>Speed</th>
+    </tr></thead><tbody>${rows}</tbody>`;
+}
+
+// ── WEEKLY ────────────────────────────────────────────────────
+function renderWeekly() {
+  const weekly = DATA.weekly || [];
+  if (!weekly.length) {
+    document.getElementById('weeklyGrid').innerHTML =
+      '<div style="color:var(--text3);font-size:.8rem;grid-column:1/-1">No weekly data available.</div>';
+    return;
+  }
+  document.getElementById('weeklyGrid').innerHTML = weekly.map(w => {
+    const sc     = w.score;
+    const cls    = sc >= 3 ? 'trade' : sc <= -3 ? 'beartrade' : 'notrade';
+    const vcls   = sc >= 3 ? 'bull-txt' : sc <= -3 ? 'bear-txt' : 'neutral-txt';
+    const trade  = w.trade;
+    return `<div class="week-card ${cls}">
+      <div class="wk-date">${w.display || w.date}</div>
+      <div class="wk-nak">${w.nak || '—'}</div>
+      <div class="wk-tithi">${w.tithi || '—'}</div>
+      <div class="wk-tithi" style="font-size:.62rem;color:var(--text3)">${w.paksha || ''} | ${w.nak_nat || ''}</div>
+      <div class="wk-score ${vcls}">${sc >= 0 ? '+' : ''}${sc}</div>
+      <div class="wk-verdict ${vcls}">${w.verdict || '—'}</div>
+      ${trade ? `<div style="font-size:.6rem;margin-top:4px;color:var(--green)">● Potential Trade Day</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ── F30 TRACKER ───────────────────────────────────────────────
+function calcF30() {
+  const openP = parseFloat(document.getElementById('openPrice').value);
+  const f30P  = parseFloat(document.getElementById('f30Price').value);
+  if (!openP || !f30P) {
+    alert('Please enter Open and F30 prices.');
+    return;
+  }
+  const baseScore = DATA ? DATA.score : 0;
+  const f30Ret = (f30P - openP) / openP * 100;
+
+  let f30Pts = 0;
+  if      (f30Ret >  0.3) f30Pts = +4;
+  else if (f30Ret >  0.1) f30Pts = +2;
+  else if (f30Ret > -0.1) f30Pts =  0;
+  else if (f30Ret > -0.3) f30Pts = -2;
+  else                     f30Pts = -4;
+
+  const totalScore = baseScore + f30Pts;
+  let verdict, acc, note, color;
+
+  if      (totalScore >= 8)  { verdict='STRONG BULL'; acc='82-90%'; color='#00E5A0'; note='High-conviction LONG. Hold until 15:00+.'; }
+  else if (totalScore >= 4)  { verdict='BULL';        acc='64-74%'; color='#00E5A0'; note='Favour longs. Buy dips in trend direction.'; }
+  else if (totalScore >= 1)  { verdict='MILD BULL';   acc='52-58%'; color='#E8C96A'; note='Small long or wait for momentum confirmation.'; }
+  else if (totalScore >= -1) { verdict='NEUTRAL';     acc='48-52%'; color='#4A5568'; note='Skip or trade very small. Coin-flip day.'; }
+  else if (totalScore >= -3) { verdict='MILD BEAR';   acc='52-58%'; color='#FF8C42'; note='Small short or avoid. Wait for confirmation.'; }
+  else if (totalScore >= -7) { verdict='BEAR';        acc='64-74%'; color='#FF4D6D'; note='Favour shorts. Short rallies. Do not buy dips.'; }
+  else                        { verdict='STRONG BEAR'; acc='82-90%'; color='#FF4D6D'; note='High-conviction SHORT. Bear continuation very likely.'; }
+
+  const cmp = parseFloat(document.getElementById('cmpPrice').value);
+  const pnlNote = cmp && openP
+    ? ` | CMP vs Open: ${(cmp-openP>=0?'+':'')}${((cmp-openP)/openP*100).toFixed(2)}%`
+    : '';
+
+  document.getElementById('f30ScoreNum').textContent  = (totalScore>=0?'+':'')+totalScore;
+  document.getElementById('f30Verdict').textContent   = verdict;
+  document.getElementById('f30Acc').textContent       = `Expected accuracy: ${acc}`;
+  document.getElementById('f30Note').textContent      = `F30: ${f30Ret>=0?'+':''}${f30Ret.toFixed(2)}% (${f30Pts>=0?'+':''}${f30Pts} pts added)${pnlNote}. ${note}`;
+  document.getElementById('f30ScoreNum').style.color  = color;
+  document.getElementById('f30Verdict').style.color   = color;
+  const res = document.getElementById('f30Result');
+  res.classList.add('show');
+  res.style.borderColor = color + '55';
+  res.style.background  = color + '0D';
+}
+
+// ── MOMENTUM BARS ─────────────────────────────────────────────
+function addBar(dir) {
+  bars.push(dir);
+  renderBars();
+}
+
+function resetBars() {
+  bars = [];
+  renderBars();
+  document.getElementById('momentumStatus').classList.remove('show');
+}
+
+function renderBars() {
+  const disp = document.getElementById('barsDisplay');
+  if (!bars.length) {
+    disp.innerHTML = '<div style="color:var(--text3);font-size:.78rem;">Add 5-min bars as they close →</div>';
+    document.getElementById('momentumStatus').classList.remove('show');
+    return;
+  }
+
+  // Count consecutive from end
+  let consecUp = 0, consecDn = 0;
+  for (let i = bars.length - 1; i >= 0; i--) {
+    if (bars[i] === 'up')      { consecUp++; if (consecDn > 0) break; }
+    else if (bars[i] === 'down'){ consecDn++; if (consecUp > 0) break; }
+    else break;
+  }
+  const maxConsec = Math.max(consecUp, consecDn);
+  const consecDir = consecUp > consecDn ? 'up' : 'down';
+
+  disp.innerHTML = bars.map((b, i) => {
+    const isActive = i >= bars.length - maxConsec;
+    const icon = b === 'up' ? '▲' : b === 'down' ? '▼' : '—';
+    return `<div class="bar-block ${b} ${isActive ? 'active' : ''}">${icon}</div>`;
+  }).join('') + `<span style="font-size:.72rem;color:var(--text3);margin-left:6px">${bars.length} bars</span>`;
+
+  // Show verdict
+  const st  = document.getElementById('momentumStatus');
+  const cnt = document.getElementById('consecCount');
+  const vd  = document.getElementById('consecVerdict');
+  st.classList.add('show');
+
+  if (maxConsec >= 6) {
+    const dir = consecDir === 'up' ? 'BULL' : 'BEAR';
+    cnt.textContent = `${maxConsec} consecutive ${consecDir.toUpperCase()} bars`;
+    vd.textContent  = `★★★ TREND MODE — ${dir === 'BULL' ? '65.7% bull accuracy' : '30.6% bull (69.4% BEAR accuracy)'}. ${dir === 'BULL' ? 'Do NOT short. Hold longs. Buy dips.' : 'Do NOT buy. Short rallies. Avoid longs.'}`;
+    st.className    = `momentum-status show ${consecDir === 'up' ? 'bull' : 'bear'}`;
+  } else if (maxConsec >= 5) {
+    cnt.textContent = `${maxConsec} consecutive ${consecDir.toUpperCase()} bars`;
+    vd.textContent  = `★★ Strong momentum — ${consecDir === 'up' ? '62.5% bull accuracy' : '34.1% bull (65.9% bear accuracy)'}. Follow the trend.`;
+    st.className    = `momentum-status show ${consecDir === 'up' ? 'bull' : 'bear'}`;
+  } else if (maxConsec >= 3) {
+    cnt.textContent = `${maxConsec} consecutive ${consecDir.toUpperCase()} bars`;
+    vd.textContent  = `Moderate momentum (${consecDir === 'up' ? '51.3% bull' : '41.2% bull'} at 3+ bars). Watch for 5th bar confirmation.`;
+    st.className    = 'momentum-status show neutral';
+  } else {
+    cnt.textContent = `${maxConsec} consecutive bars — Choppy`;
+    vd.textContent  = 'No clear momentum yet. Wait for ≥5 consecutive bars before committing.';
+    st.className    = 'momentum-status show neutral';
+  }
+}
+
+// ── 3-SESSION TRACKER ─────────────────────────────────────────
+function renderSessions() {
+  const defs = [
+    { key:'morning',   label:'Morning Session',   time:'09:15 – 10:45' },
+    { key:'mid',       label:'Mid Session',        time:'11:00 – 13:00' },
+    { key:'afternoon', label:'Afternoon Session',  time:'13:30 – 15:30' },
+  ];
+  document.getElementById('sessionsGrid').innerHTML = defs.map(s =>
+    `<div class="session-card" id="sc_${s.key}">
+      <div class="session-label">${s.label}</div>
+      <div class="session-time">${s.time}</div>
+      <div class="session-btns">
+        <button class="s-btn up" onclick="setSession('${s.key}','up')">▲ UP</button>
+        <button class="s-btn dn" onclick="setSession('${s.key}','down')">▼ DN</button>
+        <button class="s-btn na" onclick="setSession('${s.key}',null)">— Reset</button>
+      </div>
+    </div>`
+  ).join('');
+}
+
+function setSession(key, val) {
+  sessions[key] = val;
+  const card = document.getElementById('sc_' + key);
+  card.className = 'session-card ' +
+    (val === 'up' ? 'bull-s' : val === 'down' ? 'bear-s' : '');
+  evaluateSessions();
+}
+
+function evaluateSessions() {
+  const { morning, mid, afternoon } = sessions;
+  const res = document.getElementById('sessionResult');
+
+  if (morning === 'up' && mid === 'up') {
+    res.className = 'session-result show bull';
+    res.innerHTML = '<strong>★★★ BULL CLOSE CONFIRMED</strong><br>Morning↑ + Mid↑ = 93.8% bull close accuracy.<br>Hold longs. Exit at 15:00–15:30 on strength.';
+  } else if (morning === 'down' && mid === 'down') {
+    res.className = 'session-result show bear';
+    res.innerHTML = '<strong>★★★ BEAR CLOSE CONFIRMED</strong><br>Morning↓ + Mid↓ = 94.9% bear close accuracy.<br>Hold shorts. Cover at 14:30–15:00.';
+  } else if (morning === 'up' && mid === 'down') {
+    res.className = 'session-result show neutral';
+    res.innerHTML = '<strong>REVERSAL DAY</strong><br>Morning↑ + Mid↓ = Likely range-bound close.<br>Reversal rate 61.2%. Reduce size, no strong directional bias.';
+  } else if (morning === 'down' && mid === 'up') {
+    res.className = 'session-result show neutral';
+    res.innerHTML = '<strong>RECOVERY DAY</strong><br>Morning↓ + Mid↑ = Gap fill attempt likely.<br>58.7% end neutral or mildly positive. Wait for afternoon direction.';
+  } else if (morning !== null) {
+    res.className = 'session-result show neutral';
+    res.innerHTML = `<strong>${morning === 'up' ? 'Morning UP' : 'Morning DOWN'}</strong> — Add Mid session result for forecast.`;
+  } else {
+    res.classList.remove('show');
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+loadData();
+// Auto-refresh every 5 minutes during market hours
+setInterval(() => {
+  const now = new Date(new Date().toLocaleString('en-US', {timeZone:'Asia/Kolkata'}));
+  const mins = now.getHours()*60 + now.getMinutes();
+  if (mins >= 9*60 && mins <= 15*60+35) loadData();
+}, 5 * 60 * 1000);
+</script>
+</body>
+</html>
