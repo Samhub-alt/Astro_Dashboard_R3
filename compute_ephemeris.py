@@ -6,7 +6,7 @@ Run via GitHub Actions every day at 23:30 IST (18:00 UTC).
 Computes ALL signals using Swiss Ephemeris and writes data/ephemeris.json.
 The HTML dashboard reads this JSON — zero server needed.
 
-Install:  pip install pyswisseph astral
+Install:  pip install pyswisseph astral pytz
 Run:      python compute_ephemeris.py [YYYY-MM-DD]
           (no args = today IST)
 """
@@ -15,8 +15,27 @@ import json, sys, os
 from datetime import datetime, timedelta
 import pytz
 import swisseph as swe
+import urllib.request
 from astral import LocationInfo
 from astral.sun import sun as astral_sun
+
+# ── EPHEMERIS DATA AUTO-DOWNLOADER (Fixes GitHub Actions Exit Code 1) ──
+EPHE_DIR = "ephe"
+if not os.path.exists(EPHE_DIR):
+    os.makedirs(EPHE_DIR)
+
+SE1_FILE = os.path.join(EPHE_DIR, "seas_18.se1")
+if not os.path.exists(SE1_FILE):
+    print("Downloading Swiss Ephemeris file (seas_18.se1)...")
+    url = "https://www.astro.com/ftp/swisseph/ephe/seas_18.se1"
+    try:
+        urllib.request.urlretrieve(url, SE1_FILE)
+        print("Download complete.")
+    except Exception as e:
+        print(f"Warning: Failed to download ephemeris file: {e}")
+
+swe.set_ephe_path(EPHE_DIR)
+swe.set_sid_mode(swe.SIDM_LAHIRI)  # Lahiri Ayanamsa
 
 # ── CONFIG ──────────────────────────────────────────────────────
 IST         = pytz.timezone('Asia/Kolkata')
@@ -25,8 +44,6 @@ MUMBAI_LAT  = 19.0760
 MUMBAI_LON  = 72.8777
 OUTPUT_DIR  = "data"          # relative to repo root
 OUTPUT_FILE = "ephemeris.json"
-
-swe.set_sid_mode(swe.SIDM_LAHIRI)  # Lahiri Ayanamsa
 
 # ── LOOKUP TABLES ───────────────────────────────────────────────
 NAKS = ["Ashwini","Bharani","Krittika","Rohini","Mrigashira","Ardra","Punarvasu",
@@ -172,8 +189,6 @@ def compute(target_date_str=None):
     else:
         now_ist = datetime.now(IST)
         dt_ist  = now_ist.replace(hour=9, minute=15, second=0, microsecond=0)
-        if now_ist.hour < 6:  # if running at midnight, compute for today
-            dt_ist = dt_ist
 
     dt_utc = dt_ist.astimezone(UTC)
     jd     = get_jd(dt_utc)
@@ -642,7 +657,7 @@ def compute(target_date_str=None):
             "Jupiter": {"lon":round(jup,2), "sign":SIGNS3[int(jup/30)], "full_sign":SIGNS[int(jup/30)],
                         "nak":NAKS[int(jup/13.333333)], "speed":round(jup_spd,3), "rx":ju_rx,"combust":ju_combust},
             "Saturn":  {"lon":round(sat,2), "sign":SIGNS3[int(sat/30)], "full_sign":SIGNS[int(sat/30)],
-                        "nak":NAKS[int(sat/13.333333)], "speed":round(sat_spd,3), "rx":sa_rx,"combust":False},
+                        "nak":NAKS[int(sat/13.333333)],"speed":round(sat_spd,3),"rx":sa_rx,"combust":False},
             "Rahu":    {"lon":round(rahu,2),"sign":SIGNS3[int(rahu/30)],"full_sign":SIGNS[int(rahu/30)],
                         "nak":NAKS[int(rahu/13.333333)],"speed":round(rahu_spd,3),"rx":True,"combust":False},
             "Ketu":    {"lon":round(ketu,2),"sign":SIGNS3[int(ketu/30)],"full_sign":SIGNS[int(ketu/30)],
