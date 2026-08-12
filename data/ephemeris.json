@@ -1,13 +1,13 @@
 {
   "meta": {
-    "generated_at": "2026-08-12 00:42:26 IST",
+    "generated_at": "2026-08-13 00:41:33 IST",
     "engine": "SAM Astro v5.0 \u2014 Swiss Ephemeris + Lahiri Ayanamsa",
     "nifty_nat": "NSE: Nov 3, 1994, 09:55 IST, Mumbai | Moon: Swati Nak#14",
     "phases": "5 phases | 2,768 NIFTY days | 47 backtested signals",
-    "ayanamsa": 24.2288
+    "ayanamsa": 24.2289
   },
-  "date": "2026-08-12",
-  "display": "Wednesday, 12 August 2026",
+  "date": "2026-08-13",
+  "display": "Thursday, 13 August 2026",
   "score": -2,
   "verdict": "MILD BEAR",
   "accuracy": "52-58%",
@@ -15,28 +15,22 @@
   "skip_day": false,
   "signals": [
     {
+      "type": "bear",
+      "pts": -2,
+      "text": "Magha = Ugra nature (harsh) \u2014 \u22126.6% edge \u2605\u2605\u2605",
+      "cat": "Vedic"
+    },
+    {
       "type": "bull",
       "pts": 1,
-      "text": "Ashlesha = Tikshna nature (sharp) \u2014 +4.0% edge",
+      "text": "Shukla Paksha (waxing moon)",
       "cat": "Vedic"
     },
     {
       "type": "bear",
       "pts": -1,
-      "text": "Krishna Paksha (waning moon)",
-      "cat": "Vedic"
-    },
-    {
-      "type": "bear",
-      "pts": -1,
-      "text": "Moon in Water sign (Can) \u2014 \u22123.0% edge",
-      "cat": "Vedic"
-    },
-    {
-      "type": "bear",
-      "pts": -1,
-      "text": "Saturn Hora at 09:15 \u2014 restrictive hora",
-      "cat": "Hora"
+      "text": "Moon in Gandanta (water-fire junction) \u2014 42.0% bull \u2605",
+      "cat": "Special"
     }
   ],
   "timeline": [
@@ -65,28 +59,84 @@
       "subtype": "open"
     },
     {
-      "mins": 570,
-      "time": "09:30",
+      "mins": 571,
+      "time": "09:31",
       "type": "hora",
-      "label": "Jupiter Hora",
-      "note": "Bull energy | until 10:34",
+      "label": "Venus Hora",
+      "note": "Bull energy | until 10:35",
       "subtype": "bull"
     },
     {
-      "mins": 634,
-      "time": "10:34",
+      "mins": 635,
+      "time": "10:35",
       "type": "hora",
-      "label": "Mars Hora",
-      "note": "Bear energy | until 11:38",
-      "subtype": "bear"
+      "label": "Mercury Hora",
+      "note": "Neutral energy | until 11:39",
+      "subtype": "neutral"
     },
     {
-      "mins": 698,
-      "time": "11:38",
+      "mins": 699,
+      "time": "11:39",
       "type": "hora",
-      "label": "Sun Hora",
-      "note": "Bull energy | until 12:43",
-      "subtype": "bull"
+      "label": "Moon Hora",
+      "note": "Neutral energy | until 12:43",
+      "subtype": "neutral"
+    },
+    {
+      "mins": 701,
+      "time": "11:41",
+      "type": "pada",
+      "label": "Moon Pada 2 \u2014 Watch Price Action",
+      "note": "Pada 2 energy shift \u2014 small reversal risk",
+      "subtype": "watch"
+    },
+    {
+      "mins": 701,
+      "time": "11:41",
+      "type": "pada",
+      "label": "Moon Pada 3 \u2014 Watch Price Action",
+      "note": "Pada 3 energy shift \u2014 small reversal risk",
+      "subtype": "watch"
+    },
+    {
+      "mins": 701,
+      "time": "11:41",
+      "type": "pada",
+      "label": "Moon Pada 4 \u2014 Watch Price Action",
+      "note": "Pada 4 energy shift \u2014 small reversal risk",
+      "subtype": "watch"
+    },
+    {
+      "mins": 701,
+      "time": "11:41",
+      "type": "pada",
+      "label": "Moon Pada 1 \u2014 Watch Price Action",
+      "note": "Pada 1 energy shift \u2014 small reversal risk",
+      "subtype": "watch"
+    },
+    {
+      "mins": 701,
+      "time": "11:41",
+      "type": "pada",
+      "label": "Moon Pada 2 \u2014 Watch Price Action",
+      "note": "Pada 2 energy shift \u2014 small reversal risk",
+      "subtype": "watch"
+    },
+    {
+      "mins": 701,
+      "time": "11:41",
+      "type": "pada",
+      "label": "Moon Pada 3 \u2014 Watch Price Action",
+      "note": "Pada 3 energy shift \u2014 small reversal risk",
+      "subtype": "watch"
+    },
+    {
+      "mins": 701,
+      "time": "11:41",
+      "type": "pada",
+      "label": "Moon Pada 4 \u2014 Watch Price Action",
+      "note": "Pada 4 energy shift \u2014 small reversal risk",
+      "subtype": "watch"
     },
     {
       "mins": 720,
@@ -100,81 +150,25 @@
       "mins": 763,
       "time": "12:43",
       "type": "hora",
-      "label": "Venus Hora",
-      "note": "Bull energy | until 13:47",
-      "subtype": "bull"
-    },
-    {
-      "mins": 809,
-      "time": "13:29",
-      "type": "pada",
-      "label": "Moon Pada 2 \u2014 Watch Price Action",
-      "note": "Pada 2 energy shift \u2014 small reversal risk",
-      "subtype": "watch"
-    },
-    {
-      "mins": 809,
-      "time": "13:29",
-      "type": "pada",
-      "label": "Moon Pada 3 \u2014 Watch Price Action",
-      "note": "Pada 3 energy shift \u2014 small reversal risk",
-      "subtype": "watch"
-    },
-    {
-      "mins": 809,
-      "time": "13:29",
-      "type": "pada",
-      "label": "Moon Pada 4 \u2014 Watch Price Action",
-      "note": "Pada 4 energy shift \u2014 small reversal risk",
-      "subtype": "watch"
-    },
-    {
-      "mins": 809,
-      "time": "13:29",
-      "type": "pada",
-      "label": "Moon Pada 1 \u2014 Watch Price Action",
-      "note": "Pada 1 energy shift \u2014 small reversal risk",
-      "subtype": "watch"
-    },
-    {
-      "mins": 809,
-      "time": "13:29",
-      "type": "pada",
-      "label": "Moon Pada 2 \u2014 Watch Price Action",
-      "note": "Pada 2 energy shift \u2014 small reversal risk",
-      "subtype": "watch"
-    },
-    {
-      "mins": 809,
-      "time": "13:29",
-      "type": "pada",
-      "label": "Moon Pada 3 \u2014 Watch Price Action",
-      "note": "Pada 3 energy shift \u2014 small reversal risk",
-      "subtype": "watch"
-    },
-    {
-      "mins": 809,
-      "time": "13:29",
-      "type": "pada",
-      "label": "Moon Pada 4 \u2014 Watch Price Action",
-      "note": "Pada 4 energy shift \u2014 small reversal risk",
-      "subtype": "watch"
+      "label": "Saturn Hora",
+      "note": "Bear energy | until 13:47",
+      "subtype": "bear"
     },
     {
       "mins": 827,
       "time": "13:47",
       "type": "hora",
-      "label": "Mercury Hora",
-      "note": "Neutral energy | until 14:51",
-      "subtype": "neutral"
+      "label": "Jupiter Hora",
+      "note": "Bull energy | until 14:51",
+      "subtype": "bull"
     },
     {
       "mins": 891,
       "time": "14:51",
       "type": "hora",
-      "label": "Moon Hora",
-      "note": "Neutral energy | until 15:55",
-      "subtype": "neutral"
+      "label": "Mars Hora",
+      "note": "Bear energy | until 15:55",
+      "subtype": "bear"
     },
     {
       "mins": 900,
@@ -204,9 +198,9 @@
       "mins": 955,
       "time": "15:55",
       "type": "hora",
-      "label": "Saturn Hora",
-      "note": "Bear energy | until 16:59",
-      "subtype": "bear"
+      "label": "Sun Hora",
+      "note": "Bull energy | until 16:59",
+      "subtype": "bull"
     },
     {
       "mins": 960,
@@ -229,18 +223,6 @@
     }
   ],
   "weekly": [
-    {
-      "date": "2026-08-13",
-      "display": "Thu 13 Aug",
-      "nak": "Magha",
-      "nak_nat": "Ugra",
-      "tithi": "Pratipada",
-      "paksha": "Shukla",
-      "score": -1,
-      "verdict": "NEUTRAL",
-      "color": "gray",
-      "trade": false
-    },
     {
       "date": "2026-08-14",
       "display": "Fri 14 Aug",
@@ -288,33 +270,45 @@
       "verdict": "BULL",
       "color": "green",
       "trade": true
+    },
+    {
+      "date": "2026-08-20",
+      "display": "Thu 20 Aug",
+      "nak": "Anuradha",
+      "nak_nat": "Mishra",
+      "tithi": "Ashtami",
+      "paksha": "Shukla",
+      "score": -2,
+      "verdict": "NEUTRAL",
+      "color": "gray",
+      "trade": false
     }
   ],
   "panchang": {
-    "nakshatra": "Ashlesha",
-    "nak_lord": "Me",
-    "nak_nature": "Tikshna",
-    "nak_idx": 8,
+    "nakshatra": "Magha",
+    "nak_lord": "Ke",
+    "nak_nature": "Ugra",
+    "nak_idx": 9,
     "pada": 1,
     "pada_str": "Pada 1",
-    "tithi": "Amavasya",
-    "tithi_num": 30,
-    "paksha": "Krishna",
-    "yoga": "Vyatipata",
-    "karana": "Kaulava",
-    "moon_elem": "Water",
-    "moon_pos": "17.4\u00b0 Can",
-    "sun_pos": "25.2\u00b0 Can",
-    "moon_speed": 14.566,
+    "tithi": "Pratipada",
+    "tithi_num": 1,
+    "paksha": "Shukla",
+    "yoga": "Variyan",
+    "karana": "Kimstughna",
+    "moon_elem": "Fire",
+    "moon_pos": "1.9\u00b0 Leo",
+    "sun_pos": "26.2\u00b0 Can",
+    "moon_speed": 14.312,
     "moon_speed_cat": "Fast",
-    "nse_tara": 4,
-    "nse_tara_name": "Kshema",
-    "nse_tara_type": "bear",
-    "hora_at_open": "Sa",
-    "hora_name": "Saturn",
-    "hora_nature": "Bear",
-    "sunrise": "06:18",
-    "sunset": "19:08",
+    "nse_tara": 5,
+    "nse_tara_name": "Pratyak",
+    "nse_tara_type": "neutral",
+    "hora_at_open": "Su",
+    "hora_name": "Sun",
+    "hora_nature": "Bull",
+    "sunrise": "06:19",
+    "sunset": "19:07",
     "dasha_maha": "Sa",
     "dasha_maha_name": "Saturn",
     "dasha_antar": "Me",
@@ -322,16 +316,16 @@
   },
   "planets": {
     "Moon": {
-      "lon": 107.43,
-      "sign": "Can",
-      "full_sign": "Cancer",
-      "nak": "Ashlesha",
-      "speed": 14.566,
+      "lon": 121.87,
+      "sign": "Leo",
+      "full_sign": "Leo",
+      "nak": "Magha",
+      "speed": 14.312,
       "rx": false,
       "combust": false
     },
     "Sun": {
-      "lon": 115.25,
+      "lon": 116.21,
       "sign": "Can",
       "full_sign": "Cancer",
       "nak": "Ashlesha",
@@ -340,61 +334,61 @@
       "combust": false
     },
     "Mercury": {
-      "lon": 99.87,
+      "lon": 101.63,
       "sign": "Can",
       "full_sign": "Cancer",
       "nak": "Pushya",
-      "speed": 1.738,
+      "speed": 1.794,
       "rx": false,
       "combust": false
     },
     "Venus": {
-      "lon": 161.1,
+      "lon": 162.07,
       "sign": "Vir",
       "full_sign": "Virgo",
       "nak": "Hasta",
-      "speed": 0.979,
+      "speed": 0.973,
       "rx": false,
       "combust": false
     },
     "Mars": {
-      "lon": 66.3,
+      "lon": 66.96,
       "sign": "Gem",
       "full_sign": "Gemini",
-      "nak": "Mrigashira",
-      "speed": 0.662,
+      "nak": "Ardra",
+      "speed": 0.66,
       "rx": false,
       "combust": false
     },
     "Jupiter": {
-      "lon": 105.19,
+      "lon": 105.41,
       "sign": "Can",
       "full_sign": "Cancer",
       "nak": "Pushya",
-      "speed": 0.22,
+      "speed": 0.219,
       "rx": false,
       "combust": true
     },
     "Saturn": {
-      "lon": 350.29,
+      "lon": 350.26,
       "sign": "Pis",
       "full_sign": "Pisces",
       "nak": "Revati",
-      "speed": -0.028,
+      "speed": -0.029,
       "rx": true,
       "combust": false
     },
     "Rahu": {
-      "lon": 305.56,
+      "lon": 305.55,
       "sign": "Aqu",
       "full_sign": "Aquarius",
       "nak": "Dhanishta",
-      "speed": -0.012,
+      "speed": -0.002,
       "rx": true,
       "combust": false
     },
     "Ketu": {
-      "lon": 125.56,
+      "lon": 125.55,
       "sign": "Leo",
       "full_sign": "Leo",
       "nak": "Magha",
@@ -407,7 +401,7 @@
     "angarak": false,
     "angarak_tight": false,
     "guru_chandal": false,
-    "gandanta": false,
+    "gandanta": true,
     "me_rx": false,
     "ve_rx": false,
     "ma_rx": false,
